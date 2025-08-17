@@ -18,8 +18,17 @@ const ReviewsPage = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+
+const getTodayDate = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+  const [startDate, setStartDate] = useState(getTodayDate());
+const [endDate, setEndDate] = useState(getTodayDate());
+
   const [ratingFilter, setRatingFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const entriesPerPage = 5;
@@ -125,7 +134,7 @@ const ReviewsPage = () => {
     <>
       <Navbar />
       <ProtectedRoute>
-        <div className="container mx-auto lg:px-4 md:px-3 px-1.5 py-20 bg-light">
+        <div className="py-20  min-h-screen mx-auto lg:px-4 md:px-3 px-1.5  bg-light">
           <h1 className="text-3xl font-bold mb-6 text-dark">
             Customer Reviews
           </h1>
