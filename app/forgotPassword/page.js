@@ -61,8 +61,8 @@ const resetPassword = async (e) => {
     }
 
     // 2. Check password length separately
-    if (newPassword.length < 4) {
-      throw new Error('Password must be at least 4 characters');
+    if (newPassword.length < 8) {
+      throw new Error('Password must be at least 8 characters');
     }
 
     // 3. Only check for password match if length is valid

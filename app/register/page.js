@@ -24,8 +24,8 @@ export default function Register() {
         throw new Error('Please fill in all fields')
       }
 
-      if (password.length < 4) {
-        throw new Error('Password must be at least 4 characters')
+      if (password.length < 8) {
+        throw new Error('Password must be at least 8 characters')
       }
 
       // Hash the password
@@ -33,15 +33,19 @@ export default function Register() {
       const hashedPassword = await bcrypt.hash(password, salt)
 
       // Check if username already exists
-      const { data: existingUser, error: checkError } = await supabase
-        .from('login')
-        .select('username')
-        // .eq('username', username)
-        .single()
+ // Check if username already exists
+const { data: existingUser, error: checkError } = await supabase
+  .from('login')
+  .select('username')
+  .eq('username', username)
+  .maybeSingle();
 
-      if (existingUser) {
-        throw new Error('Username already exists')
-      }
+if (checkError) throw checkError;
+
+if (existingUser) {
+  throw new Error('Username already exists');
+}
+
 
       // Insert new user into Supabase
       const { data, error } = await supabase
