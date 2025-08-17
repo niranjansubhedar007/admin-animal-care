@@ -83,13 +83,13 @@ const handleLogout = () => {
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="px-4 py-2 border border-[#5E4FA2] text-[#5E4FA2] rounded-md hover:bg-gray-100 transition"
+                className="px-4 py-2 border cursor-pointer border-[#5E4FA2] text-[#5E4FA2] rounded-md hover:bg-gray-100 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-[#A294F9] text-white rounded-md hover:bg-[#8a7ae0] transition"
+                className="px-4 py-2 cursor-pointer bg-[#A294F9] text-white rounded-md hover:bg-[#8a7ae0] transition"
               >
                 Logout
               </button>
@@ -144,7 +144,7 @@ const handleLogout = () => {
             {/* Logout Button - Desktop */}
             <motion.button
               onClick={() => setShowLogoutModal(true)}
-              className="flex items-center text-[#5E4FA2] hover:text-[#A294F9] transition"
+              className="flex items-center text-[#5E4FA2] cursor-pointer hover:text-[#A294F9] transition"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -214,7 +214,7 @@ const handleLogout = () => {
           {/* Logout Button - Mobile */}
           <motion.button
             onClick={() => setShowLogoutModal(true)}
-            className={`${linkClasses("#")} w-full text-left flex items-center`}
+            className={`${linkClasses("#")} w-full text-left flex items-center cursor-pointer`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6, duration: 0.2 }}

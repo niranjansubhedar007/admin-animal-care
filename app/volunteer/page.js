@@ -125,7 +125,7 @@ const VolunteerList = () => {
   return (
     <>
       <Navbar />
-        <div className="container mx-auto lg:px-4 md:px-3 px-1.5 py-20 bg-light">
+        <div className="py-20  min-h-screen mx-auto lg:px-4 md:px-3 px-1.5  bg-light">
         <h1 className="text-3xl font-bold mb-6 text-dark">
           Volunteer Management
         </h1>
