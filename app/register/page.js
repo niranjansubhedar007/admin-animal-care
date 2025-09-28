@@ -5,54 +5,126 @@ import { useRouter } from 'next/navigation'
 import toast, { Toaster } from 'react-hot-toast'
 import { supabase } from '../utils/supabase'
 import bcrypt from 'bcryptjs'
-import { Eye, EyeOff, User } from 'lucide-react'
+import { Eye, EyeOff, User, Mail, Phone } from 'lucide-react'
 
 export default function Register() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    mobileNumber: '',
+    password: '',
+    confirmPassword: ''
+  })
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const validateForm = () => {
+    const { username, email, mobileNumber, password, confirmPassword } = formData
+
+    if (!username.trim() || !email.trim() || !mobileNumber.trim() || !password || !confirmPassword) {
+      toast.error('Please fill in all fields')
+      return false
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address')
+      return false
+    }
+
+    // Mobile number validation (basic - 10-15 digits)
+    const mobileRegex = /^[0-9]{10,15}$/
+    const cleanMobile = mobileNumber.replace(/\D/g, '')
+    if (!mobileRegex.test(cleanMobile)) {
+      toast.error('Please enter a valid mobile number (10-15 digits)')
+      return false
+    }
+
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters')
+      return false
+    }
+
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match')
+      return false
+    }
+
+    return true
+  }
+
   const handleRegister = async (e) => {
     e.preventDefault()
+    
+    if (!validateForm()) {
+      return
+    }
+
     setLoading(true)
 
     try {
-      // Validate inputs
-      if (!username.trim() || !password.trim()) {
-        throw new Error('Please fill in all fields')
+      // Clean mobile number (remove any non-digit characters)
+      const cleanMobileNumber = formData.mobileNumber.replace(/\D/g, '')
+
+      // Check if username already exists
+      const { data: existingUsername, error: usernameCheckError } = await supabase
+        .from('login')
+        .select('username')
+        .eq('username', formData.username)
+        .maybeSingle()
+
+      if (usernameCheckError) throw usernameCheckError
+      if (existingUsername) {
+        throw new Error('Username already exists')
       }
 
-      if (password.length < 8) {
-        throw new Error('Password must be at least 8 characters')
+      // Check if email already exists
+      const { data: existingEmail, error: emailCheckError } = await supabase
+        .from('login')
+        .select('email')
+        .eq('email', formData.email)
+        .maybeSingle()
+
+      if (emailCheckError) throw emailCheckError
+      if (existingEmail) {
+        throw new Error('Email already registered')
+      }
+
+      // Check if mobile number already exists
+      const { data: existingMobile, error: mobileCheckError } = await supabase
+        .from('login')
+        .select('mobile_number')
+        .eq('mobile_number', cleanMobileNumber)
+        .maybeSingle()
+
+      if (mobileCheckError) throw mobileCheckError
+      if (existingMobile) {
+        throw new Error('Mobile number already registered')
       }
 
       // Hash the password
       const salt = await bcrypt.genSalt(10)
-      const hashedPassword = await bcrypt.hash(password, salt)
-
-      // Check if username already exists
- // Check if username already exists
-const { data: existingUser, error: checkError } = await supabase
-  .from('login')
-  .select('username')
-  .eq('username', username)
-  .maybeSingle();
-
-if (checkError) throw checkError;
-
-if (existingUser) {
-  throw new Error('Username already exists');
-}
-
+      const hashedPassword = await bcrypt.hash(formData.password, salt)
 
       // Insert new user into Supabase
       const { data, error } = await supabase
         .from('login')
         .insert([
           { 
-            username: username,
+            username: formData.username,
+            email: formData.email,
+            mobile_number: cleanMobileNumber,
             password: hashedPassword,
             created_at: new Date().toISOString()
           }
@@ -62,7 +134,12 @@ if (existingUser) {
       if (error) throw error
 
       toast.success('Registration successful!')
-      router.push('/login')
+      
+      // Redirect to login after successful registration
+      setTimeout(() => {
+        router.push('/login')
+      }, 1500)
+      
     } catch (error) {
       toast.error(error.message)
     } finally {
@@ -93,13 +170,14 @@ if (existingUser) {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md m-3">
         <div className="bg-white py-8 px-6 shadow-lg rounded-xl sm:px-10 border border-light-accent">
-          <form className="space-y-6" onSubmit={handleRegister}>
+          <form className="space-y-4" onSubmit={handleRegister}>
+            {/* Username Field */}
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-dark mb-1">
                 Username
               </label>
               <div className="relative mt-1 rounded-md shadow-sm">
-                <div className="absolute inset-y-0 right-3  flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-primary" />
                 </div>
                 <input
@@ -108,14 +186,62 @@ if (existingUser) {
                   type="text"
                   autoComplete="username"
                   required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full px-4 pr-3 py-3 rounded-lg border border-light-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="block w-full px-4 pr-10 py-3 rounded-lg border border-light-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
                   placeholder="Choose a username"
                 />
               </div>
             </div>
 
+            {/* Email Field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-dark mb-1">
+                Email Address
+              </label>
+              <div className="relative mt-1 rounded-md shadow-sm">
+                <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-primary" />
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="block w-full px-4 pr-10 py-3 rounded-lg border border-light-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
+                  placeholder="Enter your email"
+                />
+              </div>
+            </div>
+
+            {/* Mobile Number Field */}
+            <div>
+              <label htmlFor="mobileNumber" className="block text-sm font-medium text-dark mb-1">
+                Mobile Number
+              </label>
+              <div className="relative mt-1 rounded-md shadow-sm">
+                <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                  <Phone className="h-5 w-5 text-primary" />
+                </div>
+                <input
+                  id="mobileNumber"
+                  name="mobileNumber"
+                  type="tel"
+                  autoComplete="tel"
+                  required
+                  value={formData.mobileNumber}
+                  onChange={handleChange}
+                  className="block w-full px-4 pr-10 py-3 rounded-lg border border-light-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
+                  placeholder="Enter your mobile number"
+                  maxLength={10}
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-dark mb-1">
                 Password
@@ -127,8 +253,8 @@ if (existingUser) {
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={formData.password}
+                  onChange={handleChange}
                   className="block w-full px-4 py-3 rounded-lg border border-light-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-150 ease-in-out pr-10"
                   placeholder="Create a password (min 8 characters)"
                 />
@@ -146,7 +272,36 @@ if (existingUser) {
               </div>
             </div>
 
-         
+            {/* Confirm Password Field */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-dark mb-1">
+                Confirm Password
+              </label>
+              <div className="relative mt-1 rounded-md shadow-sm">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className="block w-full px-4 py-3 rounded-lg border border-light-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-150 ease-in-out pr-10"
+                  placeholder="Confirm your password"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5 text-primary hover:text-dark transition-colors" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-primary hover:text-dark transition-colors" />
+                  )}
+                </button>
+              </div>
+            </div>
 
             <div>
               <button

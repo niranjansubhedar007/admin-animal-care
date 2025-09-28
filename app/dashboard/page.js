@@ -416,7 +416,7 @@ return (
                   plugins: {
                     ...chartOptions().plugins,
                     legend: {
-                      position: 'right',
+                      position: 'bottom',
                       labels: {
                         boxWidth: 20,
                         padding: 20,
@@ -443,7 +443,7 @@ return (
                   plugins: {
                     ...chartOptions().plugins,
                     legend: {
-                      position: 'right',
+                      position: 'bottom',
                       labels: {
                         boxWidth: 20,
                         padding: 20,

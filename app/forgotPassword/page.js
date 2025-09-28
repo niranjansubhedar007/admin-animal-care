@@ -3,19 +3,19 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../utils/supabase'
 import toast, { Toaster } from 'react-hot-toast'
-import { Eye, EyeOff, User, Lock, Key } from 'lucide-react'
+import { Eye, EyeOff, Mail, Phone, Key } from 'lucide-react'
 import bcrypt from 'bcryptjs'
 import Link from 'next/link'
+
 export default function ForgotPassword() {
-  const [username, setUsername] = useState('')
-  const [currentPassword, setCurrentPassword] = useState('')
+  const [emailOrMobile, setEmailOrMobile] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState(1) // 1: verify user, 2: reset password
+  const [userId, setUserId] = useState(null)
   const router = useRouter()
 
   const verifyUser = async (e) => {
@@ -23,74 +23,93 @@ export default function ForgotPassword() {
     setLoading(true)
 
     try {
-      if (!username.trim() || !currentPassword.trim()) {
-        throw new Error('Please fill in all fields')
+      if (!emailOrMobile.trim()) {
+        throw new Error('Please enter your email or mobile number')
       }
 
-      // Fetch user from Supabase
-      const { data: user, error } = await supabase
+      // Check if input is email or mobile number
+      const isEmail = emailOrMobile.includes('@')
+      const cleanMobile = emailOrMobile.replace(/\D/g, '')
+
+      let query = supabase
         .from('login')
         .select('*')
-        .eq('username', username)
-        .single()
 
-      if (error) throw error
-      if (!user) throw new Error('User not found')
+      if (isEmail) {
+        query = query.eq('email', emailOrMobile)
+      } else {
+        query = query.eq('mobile_number', cleanMobile)
+      }
 
-      // Verify current password
-      const passwordMatch = await bcrypt.compare(currentPassword, user.password)
-      if (!passwordMatch) throw new Error('Current password is incorrect')
+      const { data: user, error } = await query.single()
 
+      if (error) {
+        if (error.code === 'PGRST116') {
+          throw new Error('No account found with this email or mobile number')
+        }
+        throw error
+      }
+
+      if (!user) {
+        throw new Error('No account found with this email or mobile number')
+      }
+
+      // Store user ID for password update
+      setUserId(user.id)
       setStep(2)
-      toast.success('Identity verified')
+      toast.success('Identity verified successfully')
     } catch (err) {
-      toast.error("User verification failed")
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
   }
 
-const resetPassword = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+  const resetPassword = async (e) => {
+    e.preventDefault()
+    setLoading(true)
 
-  try {
-    // 1. Check for empty fields first
-    if (!newPassword.trim() || !confirmPassword.trim()) {
-      throw new Error('Please fill in all fields');
+    try {
+      // 1. Check for empty fields first
+      if (!newPassword.trim() || !confirmPassword.trim()) {
+        throw new Error('Please fill in all fields')
+      }
+
+      // 2. Check password length separately
+      if (newPassword.length < 8) {
+        throw new Error('Password must be at least 8 characters')
+      }
+
+      // 3. Only check for password match if length is valid
+      if (newPassword !== confirmPassword) {
+        throw new Error('Passwords do not match')
+      }
+
+      // Hash the new password
+      const salt = await bcrypt.genSalt(10)
+      const hashedPassword = await bcrypt.hash(newPassword, salt)
+
+      // Update password in Supabase using the stored user ID
+      const { error } = await supabase
+        .from('login')
+        .update({ password: hashedPassword })
+        .eq('id', userId)
+
+      if (error) throw error
+
+      toast.success('Password updated successfully!')
+      
+      // Redirect to login after a short delay
+      setTimeout(() => {
+        router.push('/login')
+      }, 1500)
+      
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setLoading(false)
     }
-
-    // 2. Check password length separately
-    if (newPassword.length < 8) {
-      throw new Error('Password must be at least 8 characters');
-    }
-
-    // 3. Only check for password match if length is valid
-    if (newPassword !== confirmPassword) {
-      throw new Error('Passwords do not match');
-    }
-
-    // Hash the new password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-    // Update password in Supabase
-    const { error } = await supabase
-      .from('login')
-      .update({ password: hashedPassword })
-      .eq('username', username);
-
-    if (error) throw error;
-
-    toast.success('Password updated successfully!');
-    router.push('/login');
-  } catch (err) {
-    // Show specific error message
-    toast.error(err.message);
-  } finally {
-    setLoading(false);
   }
-};
 
   return (
     <div className="min-h-screen bg-light flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -103,12 +122,12 @@ const resetPassword = async (e) => {
           </div>
         </div>
         <h2 className="mt-2 text-center text-3xl font-bold text-dark">
-          {step === 1 ? 'Verify Your Identity' : 'Reset Your Password'}
+          {step === 1 ? 'Reset Your Password' : 'Create New Password'}
         </h2>
         <p className="mt-2 text-center text-sm text-primary">
           {step === 1 
-            ? 'Enter your username and current password'
-            : 'Create a new password'}
+            ? 'Enter your email or mobile number to verify your identity'
+            : 'Enter your new password below'}
         </p>
       </div>
 
@@ -117,54 +136,31 @@ const resetPassword = async (e) => {
           {step === 1 ? (
             <form className="space-y-6" onSubmit={verifyUser}>
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-dark mb-1">
-                  Username
+                <label htmlFor="emailOrMobile" className="block text-sm font-medium text-dark mb-1">
+                  Email or Mobile Number
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 right-3 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-primary" />
+                    {emailOrMobile.includes('@') ? (
+                      <Mail className="h-5 w-5 text-primary" />
+                    ) : (
+                      <Phone className="h-5 w-5 text-primary" />
+                    )}
                   </div>
                   <input
-                    id="username"
-                    name="username"
+                    id="emailOrMobile"
+                    name="emailOrMobile"
                     type="text"
                     required
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={emailOrMobile}
+                    onChange={(e) => setEmailOrMobile(e.target.value)}
                     className="block w-full px-4 py-3 rounded-lg border border-light-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-150 ease-in-out"
-                    placeholder="Enter your username"
+                    placeholder="Enter your email or mobile number"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-dark mb-1">
-                  Current Password
-                </label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                 
-                  <input
-                    id="currentPassword"
-                    name="currentPassword"
-                    type={showCurrentPassword ? "text" : "password"}
-                    required
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="block w-full px-4 py-3 rounded-lg border border-light-accent placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition duration-150 ease-in-out pr-10"
-                    placeholder="Enter current password"
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  >
-                    {showCurrentPassword ? (
-                      <EyeOff className="h-5 w-5 text-primary hover:text-dark transition-colors" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-primary hover:text-dark transition-colors" />
-                    )}
-                  </button>
-                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Enter the email or mobile number associated with your account
+                </p>
               </div>
 
               <div>
@@ -173,18 +169,31 @@ const resetPassword = async (e) => {
                   disabled={loading}
                   className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-light bg-primary hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-accent transition-colors duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Verifying...' : 'Verify Identity'}
+                  {loading ? (
+                    <span className="flex items-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Verifying...
+                    </span>
+                  ) : 'Verify Identity'}
                 </button>
               </div>
             </form>
           ) : (
             <form className="space-y-6" onSubmit={resetPassword}>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-blue-800">
+                  Identity verified for: <strong>{emailOrMobile}</strong>
+                </p>
+              </div>
+
               <div>
                 <label htmlFor="newPassword" className="block text-sm font-medium text-dark mb-1">
                   New Password
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
-               
                   <input
                     id="newPassword"
                     name="newPassword"
@@ -214,7 +223,6 @@ const resetPassword = async (e) => {
                   Confirm New Password
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
-                 
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -245,7 +253,15 @@ const resetPassword = async (e) => {
                   disabled={loading}
                   className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-light bg-primary hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-accent transition-colors duration-150 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Updating...' : 'Update Password'}
+                  {loading ? (
+                    <span className="flex items-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-light" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Updating...
+                    </span>
+                  ) : 'Update Password'}
                 </button>
               </div>
             </form>
@@ -259,6 +275,20 @@ const resetPassword = async (e) => {
               Back to login
             </Link>
           </div>
+
+          {step === 1 && (
+            <div className="mt-4 text-center">
+              <p className="text-xs text-gray-500">
+                Don't remember your email or mobile?{' '}
+                <Link 
+                  href="/contact-support" 
+                  className="text-primary hover:text-dark transition-colors"
+                >
+                  Contact support
+                </Link>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

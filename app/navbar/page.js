@@ -71,9 +71,9 @@ const handleLogout = () => {
     <nav className="bg-[#F5EFFF] shadow-md fixed top-0 w-full z-50 font-sans">
       {/* Logout Confirmation Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0  backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50">
           <motion.div 
-            className="bg-white p-6  m-2 rounded-lg shadow-xl max-w-md w-full"
+            className="bg-white p-6 border border-[#5E4FA2] m-2 rounded-lg shadow-xl max-w-md w-full"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
