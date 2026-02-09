@@ -175,7 +175,7 @@ const ContactMessages = () => {
           <div className="bg-white p-4 rounded-lg shadow-md mb-6 border border-light-accent">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               {/* Left side: filters */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 flex-1">
+              <div className="grid grid-cols-2 gap-4  lg:grid-cols-5 ">
                 <div>
                 {/* Search */}
                   <div className="relative w-full">
@@ -205,7 +205,7 @@ const ContactMessages = () => {
                     <option value="donation">Donation</option>
                     <option value="adoption">Adoption</option>
                   </select>
-                  <div className="relative w-full">
+                  <div className="relative w-full ">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <ChevronDown className="h-5 w-5 text-primary" />
                     </div>
@@ -221,7 +221,7 @@ const ContactMessages = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mt-5 lg:mt-0 md:mt-0 col-span-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mt-5 lg:mt-0 md:mt-0 lg:ml-10 col-span-2">
                   <div className="flex flex-col sm:flex-row items-center space-x-2 w-full">
                     <div className="relative flex-1">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
