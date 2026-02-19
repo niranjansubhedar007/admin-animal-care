@@ -177,7 +177,7 @@ const ContactMessages = () => {
               {/* Left side: filters */}
               <div className="grid grid-cols-2 gap-4  lg:grid-cols-5 ">
                 <div>
-                {/* Search */}
+                  {/* Search */}
                   <div className="relative w-full">
                     <div className="absolute top-3 left-0 pl-3 flex items-center pointer-events-none">
                       <Search className="h-5 w-5 text-primary" />
@@ -315,9 +315,8 @@ const ContactMessages = () => {
                         currentEntries.map((message, index) => (
                           <tr
                             key={message.id}
-                            className={`hover:bg-light ${
-                              message.status === "unread" ? "bg-blue-50" : ""
-                            }`}
+                            className={`hover:bg-light ${message.status === "unread" ? "bg-blue-50" : ""
+                              }`}
                           >
                             {/* Serial Number */}
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-dark">
@@ -372,11 +371,10 @@ const ContactMessages = () => {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-dark">
                               <span
                                 className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                              ${
-                                message.status === "unread"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-gray-100 text-gray-800"
-                              }`}
+                              ${message.status === "unread"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "bg-gray-100 text-gray-800"
+                                  }`}
                               >
                                 {message.status}
                               </span>
@@ -388,11 +386,10 @@ const ContactMessages = () => {
                                 onClick={() =>
                                   toggleReadStatus(message.id, message.status)
                                 }
-                                className={`flex items-center ${
-                                  message.status === "unread"
+                                className={`flex items-center ${message.status === "unread"
                                     ? "text-primary hover:text-dark"
                                     : "text-gray-500 hover:text-primary"
-                                } transition-colors cursor-pointer`}
+                                  } transition-colors cursor-pointer`}
                               >
                                 {message.status === "unread" ? (
                                   <>
@@ -422,114 +419,113 @@ const ContactMessages = () => {
                     </tbody>
                   </table>
                 </div>
-<div className="flex items-center justify-between border-t border-light-accent bg-white px-4 py-3 sm:px-6 rounded-b-lg">
-  {/* Mobile pagination */}
-  <div className="flex flex-1 justify-between sm:hidden">
-    <button
-      onClick={() => paginate(1)}
-      disabled={currentPage === 1}
-      className="relative inline-flex items-center rounded-md border border-light-accent bg-white px-3 py-2 text-sm font-medium text-dark hover:bg-light focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      <StepBack className="h-4 w-4 mr-1" /> First
-    </button>
-    <button
-      onClick={() => paginate(currentPage - 1)}
-      disabled={currentPage === 1}
-      className="relative inline-flex items-center rounded-md border border-light-accent bg-white px-3 py-2 text-sm font-medium text-dark hover:bg-light focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      <ChevronLeft className="h-4 w-4 mr-1" /> Prev
-    </button>
-    <button
-      onClick={() => paginate(currentPage + 1)}
-      disabled={currentPage === totalPages}
-      className="relative inline-flex items-center rounded-md border border-light-accent bg-white px-3 py-2 text-sm font-medium text-dark hover:bg-light focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      Next <ChevronRight className="h-4 w-4 ml-1" />
-    </button>
-    <button
-      onClick={() => paginate(totalPages)}
-      disabled={currentPage === totalPages}
-      className="relative inline-flex items-center rounded-md border border-light-accent bg-white px-3 py-2 text-sm font-medium text-dark hover:bg-light focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      Last <StepForward className="h-4 w-4 ml-1" />
-    </button>
-  </div>
+                <div className="flex items-center justify-between border-t border-light-accent bg-white px-4 py-3 sm:px-6 rounded-b-lg">
+                  {/* Mobile pagination */}
+                  <div className="flex flex-1 justify-between sm:hidden">
+                    <button
+                      onClick={() => paginate(1)}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center rounded-md border border-light-accent bg-white px-3 py-2 text-sm font-medium text-dark hover:bg-light focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <StepBack className="h-4 w-4 mr-1" /> First
+                    </button>
+                    <button
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center rounded-md border border-light-accent bg-white px-3 py-2 text-sm font-medium text-dark hover:bg-light focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" /> Prev
+                    </button>
+                    <button
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="relative inline-flex items-center rounded-md border border-light-accent bg-white px-3 py-2 text-sm font-medium text-dark hover:bg-light focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next <ChevronRight className="h-4 w-4 ml-1" />
+                    </button>
+                    <button
+                      onClick={() => paginate(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className="relative inline-flex items-center rounded-md border border-light-accent bg-white px-3 py-2 text-sm font-medium text-dark hover:bg-light focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Last <StepForward className="h-4 w-4 ml-1" />
+                    </button>
+                  </div>
 
-  {/* Desktop pagination */}
-  <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-    <div>
-      <p className="text-sm text-primary">
-        Showing{" "}
-        <span className="font-medium">{indexOfFirstEntry + 1}</span> to{" "}
-        <span className="font-medium">
-          {Math.min(indexOfLastEntry, filteredMessages.length)}
-        </span>{" "}
-        of <span className="font-medium">{filteredMessages.length}</span> results
-      </p>
-    </div>
-    <div>
-      <nav
-        className="isolate inline-flex -space-x-px rounded-md shadow-sm"
-        aria-label="Pagination"
-      >
-        {/* First Page */}
-        <button
-          onClick={() => paginate(1)}
-          disabled={currentPage === 1}
-          className="relative inline-flex items-center rounded-l-md px-2 py-2 text-primary ring-1 ring-inset ring-light-accent hover:bg-light focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span className="sr-only">First</span>
-          <StepBack className="h-5 w-5" aria-hidden="true" />
-        </button>
+                  {/* Desktop pagination */}
+                  <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm text-primary">
+                        Showing{" "}
+                        <span className="font-medium">{indexOfFirstEntry + 1}</span> to{" "}
+                        <span className="font-medium">
+                          {Math.min(indexOfLastEntry, filteredMessages.length)}
+                        </span>{" "}
+                        of <span className="font-medium">{filteredMessages.length}</span> results
+                      </p>
+                    </div>
+                    <div>
+                      <nav
+                        className="isolate inline-flex -space-x-px rounded-md shadow-sm"
+                        aria-label="Pagination"
+                      >
+                        {/* First Page */}
+                        <button
+                          onClick={() => paginate(1)}
+                          disabled={currentPage === 1}
+                          className="relative inline-flex items-center rounded-l-md px-2 py-2 text-primary ring-1 ring-inset ring-light-accent hover:bg-light focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <span className="sr-only">First</span>
+                          <StepBack className="h-5 w-5" aria-hidden="true" />
+                        </button>
 
-        {/* Previous */}
-        <button
-          onClick={() => paginate(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="relative inline-flex items-center px-2 py-2 text-primary ring-1 ring-inset ring-light-accent hover:bg-light focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span className="sr-only">Previous</span>
-          <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-        </button>
+                        {/* Previous */}
+                        <button
+                          onClick={() => paginate(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className="relative inline-flex items-center px-2 py-2 text-primary ring-1 ring-inset ring-light-accent hover:bg-light focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <span className="sr-only">Previous</span>
+                          <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                        </button>
 
-        {/* Page numbers */}
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-          <button
-            key={number}
-            onClick={() => paginate(number)}
-            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
-              currentPage === number
-                ? "bg-primary text-light"
-                : "text-dark ring-1 ring-inset ring-light-accent hover:bg-light"
-            }`}
-          >
-            {number}
-          </button>
-        ))}
+                        {/* Page numbers */}
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+                          <button
+                            key={number}
+                            onClick={() => paginate(number)}
+                            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${currentPage === number
+                                ? "bg-primary text-light"
+                                : "text-dark ring-1 ring-inset ring-light-accent hover:bg-light"
+                              }`}
+                          >
+                            {number}
+                          </button>
+                        ))}
 
-        {/* Next */}
-        <button
-          onClick={() => paginate(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="relative inline-flex items-center px-2 py-2 text-primary ring-1 ring-inset ring-light-accent hover:bg-light focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span className="sr-only">Next</span>
-          <ChevronRight className="h-5 w-5" aria-hidden="true" />
-        </button>
+                        {/* Next */}
+                        <button
+                          onClick={() => paginate(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className="relative inline-flex items-center px-2 py-2 text-primary ring-1 ring-inset ring-light-accent hover:bg-light focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <span className="sr-only">Next</span>
+                          <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                        </button>
 
-        {/* Last Page */}
-        <button
-          onClick={() => paginate(totalPages)}
-          disabled={currentPage === totalPages}
-          className="relative inline-flex items-center rounded-r-md px-2 py-2 text-primary ring-1 ring-inset ring-light-accent hover:bg-light focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span className="sr-only">Last</span>
-          <StepForward className="h-5 w-5" aria-hidden="true" />
-        </button>
-      </nav>
-    </div>
-  </div>
-</div>
+                        {/* Last Page */}
+                        <button
+                          onClick={() => paginate(totalPages)}
+                          disabled={currentPage === totalPages}
+                          className="relative inline-flex items-center rounded-r-md px-2 py-2 text-primary ring-1 ring-inset ring-light-accent hover:bg-light focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <span className="sr-only">Last</span>
+                          <StepForward className="h-5 w-5" aria-hidden="true" />
+                        </button>
+                      </nav>
+                    </div>
+                  </div>
+                </div>
 
 
               </div>
